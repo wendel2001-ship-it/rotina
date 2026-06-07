@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Minha Rotina">
+<meta name="theme-color" content="#f5c842">
+<link rel="manifest" href="manifest.json">
+<title>Minha Rotina de Evolução</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0f;
+    --card: #111118;
+    --card2: #16161f;
+    --gold: #f5c842;
+    --orange: #ff6b35;
+    --green: #39d98a;
+    --blue: #4fa3e0;
+    --purple: #a78bfa;
+    --text: #e8e8f0;
+    --muted: #6b6b85;
+    --border: rgba(255,255,255,0.06);
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding-bottom: 32px;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #0d0d1a 0%, #1a0a2e 50%, #0a1a0d 100%);
+    padding: 48px 24px 36px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(245,200,66,0.12) 0%, transparent 70%);
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(245,200,66,0.15);
+    border: 1px solid rgba(245,200,66,0.4);
+    color: var(--gold);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(44px, 11vw, 80px);
+    line-height: 0.9;
+    letter-spacing: 2px;
+    color: #fff;
+    position: relative;
+  }
+  .hero h1 span { color: var(--gold); }
+  .hero-date {
+    margin-top: 14px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 1px;
+  }
+  .hero-date strong { color: var(--gold); }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    padding: 16px 16px 0;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .progress-label { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .progress-count { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--gold); }
+  .progress-bar-bg {
+    background: var(--card);
+    border-radius: 8px;
+    height: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--green));
+    border-radius: 8px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+    width: 0%;
+  }
+
+  /* TABS */
+  .tabs {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,15,0.97);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 0 8px;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0;
+    padding: 14px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* SECTIONS */
+  .section { display: none; padding: 16px 16px 40px; max-width: 960px; margin: 0 auto; }
+  .section.active { display: block; }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 2px;
+    margin: 8px 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* CALENDAR STRIP */
+  .cal-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 4px 0 12px;
+    margin-bottom: 4px;
+  }
+  .cal-strip::-webkit-scrollbar { display: none; }
+  .cal-day {
+    flex-shrink: 0;
+    width: 52px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .cal-day.today {
+    border-color: var(--gold);
+    background: rgba(245,200,66,0.08);
+  }
+  .cal-day.selected {
+    border-color: var(--gold);
+    background: rgba(245,200,66,0.15);
+  }
+  .cal-day.has-progress { position: relative; }
+  .cal-day.has-progress::after {
+    content: '';
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+  .cal-day.completed::after { background: var(--gold); }
+  .cal-weekday { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
+  .cal-num { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--text); }
+  .cal-day.today .cal-num, .cal-day.selected .cal-num { color: var(--gold); }
+
+  /* CHECKLIST */
+  .check-block {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 4px 0;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .check-block-header {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 12px 16px 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .check-block.manha .check-block-header { color: var(--gold); }
+  .check-block.noite .check-block-header { color: var(--blue); }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    cursor: pointer;
+    transition: background 0.15s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item:active { background: rgba(255,255,255,0.03); }
+  .check-item.done { opacity: 0.5; }
+
+  .check-box {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    border: 2px solid var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    font-size: 14px;
+  }
+  .check-item.done .check-box {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  .check-time {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 17px;
+    color: var(--muted);
+    min-width: 48px;
+  }
+  .check-emoji { font-size: 18px; min-width: 22px; }
+  .check-label {
+    font-size: 14px;
+    font-weight: 500;
+    flex: 1;
+  }
+  .check-item.done .check-label { text-decoration: line-through; color: var(--muted); }
+
+  /* CONGRATS */
+  .congrats {
+    display: none;
+    background: linear-gradient(135deg, rgba(57,217,138,0.12), rgba(245,200,66,0.12));
+    border: 1px solid rgba(57,217,138,0.3);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 12px;
+    animation: popIn 0.4s cubic-bezier(.4,0,.2,1);
+  }
+  .congrats.show { display: block; }
+  @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .congrats h3 { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--green); letter-spacing: 2px; }
+  .congrats p { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  /* RESET BTN */
+  .reset-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: block;
+    margin: 8px auto 0;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+  .reset-btn:active { border-color: var(--orange); color: var(--orange); }
+
+  /* MEDIA / APP cards */
+  .media-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+  .media-card-title {
+    font-size: 12px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .media-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    text-decoration: none; color: inherit; transition: background 0.15s;
+    border-radius: 8px; margin: 0 -6px; padding-left: 6px; padding-right: 6px;
+  }
+  .media-item:last-child { border-bottom: none; }
+  .media-item:active { background: rgba(255,255,255,0.04); }
+  .media-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .media-item-text strong { font-size: 14px; font-weight: 600; display: block; }
+  .media-item-text span { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .media-arrow { margin-left: auto; color: var(--muted); font-size: 14px; align-self: center; }
+
+  .app-link {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 10px;
+    text-decoration: none; color: inherit; transition: border-color 0.2s;
+  }
+  .app-link:active { border-color: var(--gold); }
+  .app-icon { font-size: 28px; min-width: 36px; text-align: center; }
+  .app-info strong { font-size: 14px; font-weight: 600; display: block; }
+  .app-info span { font-size: 12px; color: var(--muted); }
+  .app-go { margin-left: auto; color: var(--muted); font-size: 18px; }
+
+  .quando-card {
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px;
+    display: flex; align-items: center; gap: 14px; margin-bottom: 10px;
+  }
+  .quando-emoji { font-size: 26px; }
+  .quando-text strong { font-size: 13px; font-weight: 600; display: block; }
+  .quando-text span { font-size: 12px; color: var(--muted); }
+
+  .dica-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px; margin-bottom: 12px;
+    position: relative; overflow: hidden;
+  }
+  .dica-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .dica-card.gold::before { background: var(--gold); }
+  .dica-card.orange::before { background: var(--orange); }
+  .dica-card.green::before { background: var(--green); }
+  .dica-card.blue::before { background: var(--blue); }
+  .dica-card.purple::before { background: var(--purple); }
+  .dica-card h3 { font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+  .dica-card.gold h3 { color: var(--gold); }
+  .dica-card.orange h3 { color: var(--orange); }
+  .dica-card.green h3 { color: var(--green); }
+  .dica-card.blue h3 { color: var(--blue); }
+  .dica-card.purple h3 { color: var(--purple); }
+  .dica-item { display: flex; gap: 8px; margin-bottom: 8px; font-size: 13px; line-height: 1.5; color: #c8c8d8; }
+  .dica-item::before { content: '→'; flex-shrink: 0; opacity: 0.4; margin-top: 1px; }
+
+  .motivacao {
+    background: linear-gradient(135deg, rgba(245,200,66,0.08), rgba(57,217,138,0.08));
+    border: 1px solid rgba(245,200,66,0.2);
+    border-radius: 20px; padding: 28px 20px; text-align: center; margin-top: 8px;
+  }
+  .motivacao h2 { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; margin-bottom: 8px; }
+  .motivacao p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">🚀 Guia Completo</div>
+  <h1>MINHA<br><span>ROTINA</span></h1>
+  <div class="hero-date">Hoje: <strong id="heroDate"></strong></div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="progress-header">
+    <span class="progress-label">✅ Progresso do dia</span>
+    <span class="progress-count"><span id="doneCount">0</span>/<span id="totalCount">14</span></span>
+  </div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+</div>
+
+<!-- TABS -->
+<nav class="tabs">
+  <div class="tab active" onclick="showTab('checklist', this)">✅ Hoje</div>
+  <div class="tab" onclick="showTab('podcasts', this)">🎙️ Podcasts</div>
+  <div class="tab" onclick="showTab('audiolivros', this)">📚 Audiolivros</div>
+  <div class="tab" onclick="showTab('apps', this)">📱 Apps</div>
+  <div class="tab" onclick="showTab('dicas', this)">💡 Dicas</div>
+</nav>
+
+<!-- ✅ CHECKLIST -->
+<div class="section active" id="checklist">
+
+  <!-- CALENDAR STRIP -->
+  <div class="cal-strip" id="calStrip"></div>
+
+  <div class="congrats" id="congrats">
+    <h3>🏆 DIA COMPLETO!</h3>
+    <p>Você concluiu toda a rotina de hoje. Incrível! 💪🔥</p>
+  </div>
+
+  <div class="section-title">🌅 Manhã</div>
+  <div class="check-block manha">
+    <div class="check-block-header">☀️ Antes do Trabalho</div>
+    <div class="check-item" onclick="toggle(this)" data-id="m1">
+      <div class="check-box"></div><span class="check-time">05:00</span><span class="check-emoji">⏰</span><span class="check-label">Acordar + água</span>
+    </div>
+    <div class="check-item" onclick="toggle(this)" data-id="m2">
+      <div class="check-box"></div><span class="check-time">05:05</span><span class="check-emoji">🧘</span><span class="check-label">Alongamento (15min)</span>
+    </div>
+    <div class="check-item" onclick="toggle(this)" data-id="m3">
+      <div class="check-box"></div><span class="check-time">05:20</span><span class="check-emoji">📖</span><span class="check-label">Leitura de livro (30min)</span>
+    </div>
+    <div class="check-item" onclick="toggle(this)" data-id="m4">
+      <div class="check-box"></div><span class="check-time">05:50</span><span class="check-emoji">☕</span><span class="check-label">Café da manhã + preparo</span>
+    </div>
+    <div class="check-item" onclick="toggle(this)" data-id="m5">
+      <div class="check-box"></div><span class="check-time">06:10</span><span class="check-emoji">🚐</span><span class="check-label">Van para o trabalho</span>
+    </div>
+  </div>
+
+  <div class="section-title">🌙 Noite</div>
+  <div class="check-block noite">
+    <div class="check-block-header">🏠 Após o Trabalho</div>
+    <div class="check-item" onclick="toggle(this)" data-id="n1">
+      <div class="check-box"></div><span class="check-time">18:00</span><span class="check-emoji">🍌</span><span class="check-label">Chegada + lanche pré-treino</span>
+    </div>
+    <div class="check-item" onclick="toggle(this)" data-id="n2">
+      <div class="check-box"></div><span class="check-time">18:20</span><span class="check-emoji">🚶</span><span class="check-label">Deslocamento para academia</span>
+    </div>
+    <div class="check-item" onclick="toggle(this)" data-id="n3">
+      <div class="check-box"></div><span class="check-time">18:40</span><span class="check-emoji">🏋️</span><span class="check-label">Treino de força (1h)</span>
+    </div>
+    <div class="check-item" onclick="toggle(this)" data-id="n4">
+      <div class="check-box"></div><span class="check-time">19:40</span><span class="check-emoji">🏃</span><span class="check-label">Cardio leve (20min)</span>
+    </div>
+    <div class="check-item" onclick="toggle(this)" data-id="n5">
+      <div class="check-box"></div><span class="check-time">20:00</span><span class="check-emoji">🚶</span><span class="check-label">Volta para casa</span>
+    </div>
+    <div class="check-item" onclick="toggle(this)" data-id="n6">
+      <div class="check-box"></div><span class="check-time">20:20</span><span class="check-emoji">🛁</span><span class="check-label">Banho + jantar</span>
+    </div>
+    <div class="check-item" onclick="toggle(this)" data-id="n7">
+      <div class="check-box"></div><span class="check-time">21:00</span><span class="check-emoji">📚</span><span class="check-label">Estudo (Pomodoro 25+5)</span>
+    </div>
+    <div class="check-item" onclick="toggle(this)" data-id="n8">
+      <div class="check-box"></div><span class="check-time">21:40</span><span class="check-emoji">😌</span><span class="check-label">Relaxamento sem tela</span>
+    </div>
+    <div class="check-item" onclick="toggle(this)" data-id="n9">
+      <div class="check-box"></div><span class="check-time">22:00</span><span class="check-emoji">😴</span><span class="check-label">Dormir</span>
+    </div>
+  </div>
+
+  <button class="reset-btn" onclick="resetDay()">↺ Resetar dia</button>
+</div>
+
+<!-- PODCASTS -->
+<div class="section" id="podcasts">
+  <div class="section-title">🎙️ Podcasts</div>
+  <div class="media-card">
+    <div class="media-card-title" style="color:var(--gold)">📰 Atualidades & Notícias</div>
+    <a class="media-item" href="https://open.spotify.com/show/7pjSaMYmVbpLGx8RHFCxWr" target="_blank">
+      <div class="media-dot" style="background:var(--gold)"></div>
+      <div class="media-item-text"><strong>Café da Manhã</strong><span>Folha de S.Paulo · Atualidades diárias · 15-30min · Ideal para a van</span></div>
+      <span class="media-arrow">↗</span>
+    </a>
+    <a class="media-item" href="https://open.spotify.com/show/3hqBpNRDVA4S2PjBpNPuJm" target="_blank">
+      <div class="media-dot" style="background:var(--gold)"></div>
+      <div class="media-item-text"><strong>Petit Journal</strong><span>Política e economia internacional descomplicada</span></div>
+      <span class="media-arrow">↗</span>
+    </a>
+  </div>
+  <div class="media-card">
+    <div class="media-card-title" style="color:var(--blue)">💻 Cultura & Inovação</div>
+    <a class="media-item" href="https://open.spotify.com/show/0prjLMovqSIMlbAqcMDL5E" target="_blank">
+      <div class="media-dot" style="background:var(--blue)"></div>
+      <div class="media-item-text"><strong>Braincast</strong><span>Cultura digital, inovação e comportamento</span></div>
+      <span class="media-arrow">↗</span>
+    </a>
+  </div>
+  <div class="media-card">
+    <div class="media-card-title" style="color:var(--purple)">🧠 Desenvolvimento Pessoal</div>
+    <a class="media-item" href="https://open.spotify.com/show/3Bno5kHMGLbGD5wMDWOHoT" target="_blank">
+      <div class="media-dot" style="background:var(--purple)"></div>
+      <div class="media-item-text"><strong>Inteligência Ltda.</strong><span>Filosofia, comportamento e mentalidade</span></div>
+      <span class="media-arrow">↗</span>
+    </a>
+    <a class="media-item" href="https://open.spotify.com/show/1Vc9Qyq3OQpBRMVYGnbDgd" target="_blank">
+      <div class="media-dot" style="background:var(--purple)"></div>
+      <div class="media-item-text"><strong>Autoconsciente</strong><span>Autoconhecimento e saúde emocional</span></div>
+      <span class="media-arrow">↗</span>
+    </a>
+  </div>
+  <div class="media-card">
+    <div class="media-card-title" style="color:var(--orange)">🏛️ História</div>
+    <a class="media-item" href="https://open.spotify.com/show/1OLcQdw2PFDPG1jo3jHXMm" target="_blank">
+      <div class="media-dot" style="background:var(--orange)"></div>
+      <div class="media-item-text"><strong>História em Meia Hora</strong><span>Episódios rápidos · Perfeito para o cardio</span></div>
+      <span class="media-arrow">↗</span>
+    </a>
+  </div>
+  <div class="quando-card"><span class="quando-emoji">🚐</span><div class="quando-text"><strong>Na van da manhã</strong><span>Café da Manhã ou Petit Journal (curtos)</span></div></div>
+  <div class="quando-card"><span class="quando-emoji">🏃</span><div class="quando-text"><strong>No cardio (20min)</strong><span>História em Meia Hora ou Inteligência Ltda.</span></div></div>
+</div>
+
+<!-- AUDIOLIVROS -->
+<div class="section" id="audiolivros">
+  <div class="section-title">📚 Audiolivros</div>
+  <div class="media-card">
+    <div class="media-card-title" style="color:var(--gold)">🧠 Hábitos & Mentalidade</div>
+    <a class="media-item" href="https://www.amazon.com.br/poder-h%C3%A1bito-Charles-Duhigg/dp/B00IOAOFFA" target="_blank">
+      <div class="media-dot" style="background:var(--gold)"></div>
+      <div class="media-item-text"><strong>O Poder do Hábito</strong><span>Charles Duhigg · Como criar e transformar hábitos com ciência</span></div>
+      <span class="media-arrow">↗</span>
+    </a>
+    <a class="media-item" href="https://www.amazon.com.br/Atomic-Habits-James-Clear/dp/B07RFSSYBH" target="_blank">
+      <div class="media-dot" style="background:var(--gold)"></div>
+      <div class="media-item-text"><strong>Atomic Habits</strong><span>James Clear · Guia prático para hábitos duradouros</span></div>
+      <span class="media-arrow">↗</span>
+    </a>
+    <a class="media-item" href="https://www.amazon.com.br/Mindset-Carol-Dweck/dp/B078PSCFF9" target="_blank">
+      <div class="media-dot" style="background:var(--purple)"></div>
+      <div class="media-item-text"><strong>Mindset</strong><span>Carol Dweck · Mentalidade de crescimento</span></div>
+      <span class="media-arrow">↗</span>
+    </a>
+  </div>
+  <div class="media-card">
+    <div class="media-card-title" style="color:var(--blue)">🤝 Relações & Produtividade</div>
+    <a class="media-item" href="https://www.amazon.com.br/Como-fazer-amigos-influenciar-pessoas/dp/B008K5DGA4" target="_blank">
+      <div class="media-dot" style="background:var(--blue)"></div>
+      <div class="media-item-text"><strong>Como Fazer Amigos e Influenciar Pessoas</strong><span>Dale Carnegie · Relações humanas e comunicação</span></div>
+      <span class="media-arrow">↗</span>
+    </a>
+    <a class="media-item" href="https://www.amazon.com.br/7-H%C3%A1bitos-das-Pessoas-Altamente/dp/B004QBYUCC" target="_blank">
+      <div class="media-dot" style="background:var(--blue)"></div>
+      <div class="media-item-text"><strong>Os 7 Hábitos das Pessoas Altamente Eficazes</strong><span>Stephen Covey · Produtividade e perspectiva de vida</span></div>
+      <span class="media-arrow">↗</span>
+    </a>
+  </div>
+  <div class="media-card">
+    <div class="media-card-title" style="color:var(--orange)">💰 Mentalidade Financeira</div>
+    <a class="media-item" href="https://www.amazon.com.br/Pense-enrique%C3%A7a-Napoleon-Hill/dp/B004QBSEX8" target="_blank">
+      <div class="media-dot" style="background:var(--orange)"></div>
+      <div class="media-item-text"><strong>Pense e Enriqueça</strong><span>Napoleon Hill · Mentalidade e objetivos financeiros</span></div>
+      <span class="media-arrow">↗</span>
+    </a>
+  </div>
+  <div class="quando-card"><span class="quando-emoji">🚶</span><div class="quando-text"><strong>Caminho academia (20min)</strong><span>Audiolivro — absorção enquanto caminha</span></div></div>
+  <div class="quando-card"><span class="quando-emoji">🚶</span><div class="quando-text"><strong>Volta pra casa (20min)</strong><span>Audiolivro ou podcast mais longo</span></div></div>
+</div>
+
+<!-- APPS -->
+<div class="section" id="apps">
+  <div class="section-title">📱 Apps Essenciais</div>
+  <div class="media-card">
+    <div class="media-card-title" style="color:var(--green)">🎧 Podcasts & Audiolivros</div>
+    <a class="app-link" href="https://open.spotify.com" target="_blank"><span class="app-icon">🟢</span><div class="app-info"><strong>Spotify</strong><span>Podcasts e audiolivros em um só lugar</span></div><span class="app-go">↗</span></a>
+    <a class="app-link" href="https://www.audible.com.br" target="_blank"><span class="app-icon">🟠</span><div class="app-info"><strong>Audible</strong><span>Maior plataforma de audiolivros do mundo</span></div><span class="app-go">↗</span></a>
+  </div>
+  <div class="media-card">
+    <div class="media-card-title" style="color:var(--blue)">📚 Leitura & Estudo</div>
+    <a class="app-link" href="https://www.amazon.com.br/kindle" target="_blank"><span class="app-icon">📖</span><div class="app-info"><strong>Kindle</strong><span>Leitura de livros digitais</span></div><span class="app-go">↗</span></a>
+    <a class="app-link" href="https://www.notion.so" target="_blank"><span class="app-icon">📝</span><div class="app-info"><strong>Notion</strong><span>Organizar estudos, anotações e metas</span></div><span class="app-go">↗</span></a>
+  </div>
+  <div class="media-card">
+    <div class="media-card-title" style="color:var(--orange)">💪 Treino & Saúde</div>
+    <a class="app-link" href="https://www.hevy.com" target="_blank"><span class="app-icon">🏋️</span><div class="app-info"><strong>Hevy</strong><span>Registrar séries, repetições e carga do treino</span></div><span class="app-go">↗</span></a>
+    <a class="app-link" href="https://www.myfitnesspal.com" target="_blank"><span class="app-icon">🥗</span><div class="app-info"><strong>MyFitnessPal</strong><span>Controle de proteína e calorias</span></div><span class="app-go">↗</span></a>
+  </div>
+  <div class="media-card">
+    <div class="media-card-title" style="color:var(--purple)">🎯 Foco & Produtividade</div>
+    <a class="app-link" href="https://www.forestapp.cc" target="_blank"><span class="app-icon">🌲</span><div class="app-info"><strong>Forest</strong><span>Foco no estudo com a técnica Pomodoro</span></div><span class="app-go">↗</span></a>
+  </div>
+</div>
+
+<!-- DICAS -->
+<div class="section" id="dicas">
+  <div class="section-title">💡 Dicas Essenciais</div>
+  <div class="dica-card gold"><h3>🧠 Mentalidade & Consistência</h3>
+    <div class="dica-item">Se perder um dia, não perca dois — consistência vence intensidade</div>
+    <div class="dica-item">Anote 3 objetivos e releia toda semana</div>
+    <div class="dica-item">Comemore pequenas vitórias toda semana cumprida</div>
+    <div class="dica-item">Todo domingo: revise o que cumpriu e o que falhou, sem culpa</div>
+  </div>
+  <div class="dica-card orange"><h3>💪 Ganho de Massa</h3>
+    <div class="dica-item">Aumente a carga progressivamente a cada 1-2 semanas</div>
+    <div class="dica-item">Meta de proteína: 2g por kg do seu peso por dia</div>
+    <div class="dica-item">Cardio após o treino de força = queima gordura sem perder massa</div>
+    <div class="dica-item">1-2 dias de descanso por semana são obrigatórios</div>
+  </div>
+  <div class="dica-card green"><h3>🍽️ Alimentação</h3>
+    <div class="dica-item">Pré-treino: carboidrato + proteína (banana + whey / pão + ovo)</div>
+    <div class="dica-item">Pós-treino: priorize proteína no jantar para recuperação</div>
+    <div class="dica-item">Hidrate bem antes, durante e após o treino</div>
+    <div class="dica-item">Jante pelo menos 2h antes de dormir</div>
+  </div>
+  <div class="dica-card blue"><h3>📚 Estudo Eficiente</h3>
+    <div class="dica-item">Técnica Pomodoro: 25min focado + 5min de pausa</div>
+    <div class="dica-item">Celular longe durante o estudo — modo silencioso</div>
+    <div class="dica-item">Regra dos 2 minutos: tarefa rápida? Faça agora</div>
+  </div>
+  <div class="dica-card purple"><h3>🌙 Sono & Recuperação</h3>
+    <div class="dica-item">GH liberado à noite — 7h de sono é prioridade</div>
+    <div class="dica-item">Evite telas nos 20min antes de dormir</div>
+    <div class="dica-item">Nos dias de descanso, substitua o treino por caminhada leve</div>
+  </div>
+  <div class="dica-card orange"><h3>📱 Controle do Celular</h3>
+    <div class="dica-item">Modo silencioso a partir das 21h</div>
+    <div class="dica-item">Deslocamentos = aprendizado (podcast/audiolivro)</div>
+    <div class="dica-item">Não acesse redes sociais antes do café da manhã</div>
+  </div>
+  <div class="motivacao">
+    <h2>🔥 AGORA É SÓ EXECUTAR</h2>
+    <p>Você montou hoje o que a maioria nunca faz. Nos primeiros 21 dias é mais difícil — depois vira hábito. <strong>Bora! 💪</strong></p>
+  </div>
+</div>
+
+<script>
+const TOTAL = 14;
+const dias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+function getTodayKey() {
+  const d = new Date();
+  return `rotina_${d.getFullYear()}_${d.getMonth()}_${d.getDate()}`;
+}
+function getDateKey(date) {
+  return `rotina_${date.getFullYear()}_${date.getMonth()}_${date.getDate()}`;
+}
+
+// Hero date
+const now = new Date();
+document.getElementById('heroDate').textContent =
+  `${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]}`;
+
+// STATE
+let selectedDateKey = getTodayKey();
+let state = {}; // { [dateKey]: { [itemId]: true } }
+
+function loadState() {
+  try { state = JSON.parse(localStorage.getItem('rotina_state') || '{}'); } catch(e) { state = {}; }
+}
+function saveState() {
+  try { localStorage.setItem('rotina_state', JSON.stringify(state)); } catch(e) {}
+}
+
+function getDayData(key) {
+  return state[key] || {};
+}
+function setItemDone(dateKey, id, done) {
+  if (!state[dateKey]) state[dateKey] = {};
+  if (done) state[dateKey][id] = true;
+  else delete state[dateKey][id];
+  saveState();
+}
+function getDoneCount(dateKey) {
+  return Object.keys(getDayData(dateKey)).length;
+}
+
+// RENDER CHECKLIST
+function renderChecklist() {
+  const data = getDayData(selectedDateKey);
+  document.querySelectorAll('.check-item').forEach(el => {
+    const id = el.dataset.id;
+    const done = !!data[id];
+    el.classList.toggle('done', done);
+    el.querySelector('.check-box').textContent = done ? '✓' : '';
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  const done = getDoneCount(selectedDateKey);
+  document.getElementById('doneCount').textContent = done;
+  document.getElementById('totalCount').textContent = TOTAL;
+  document.getElementById('progressFill').style.width = (done / TOTAL * 100) + '%';
+  const congrats = document.getElementById('congrats');
+  if (done === TOTAL) congrats.classList.add('show');
+  else congrats.classList.remove('show');
+  renderCalStrip();
+}
+
+function toggle(el) {
+  const id = el.dataset.id;
+  const isDone = el.classList.contains('done');
+  setItemDone(selectedDateKey, id, !isDone);
+  renderChecklist();
+}
+
+function resetDay() {
+  if (confirm('Resetar checklist do dia?')) {
+    state[selectedDateKey] = {};
+    saveState();
+    renderChecklist();
+  }
+}
+
+// CALENDAR STRIP (last 14 days)
+function renderCalStrip() {
+  const strip = document.getElementById('calStrip');
+  strip.innerHTML = '';
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const key = getDateKey(d);
+    const done = getDoneCount(key);
+    const isToday = i === 0;
+    const isSelected = key === selectedDateKey;
+
+    const div = document.createElement('div');
+    div.className = 'cal-day' +
+      (isToday ? ' today' : '') +
+      (isSelected ? ' selected' : '') +
+      (done > 0 && done < TOTAL ? ' has-progress' : '') +
+      (done === TOTAL ? ' completed' : '');
+
+    div.innerHTML = `<div class="cal-weekday">${dias[d.getDay()]}</div><div class="cal-num">${d.getDate()}</div>`;
+    div.onclick = () => {
+      selectedDateKey = key;
+      renderChecklist();
+    };
+    strip.appendChild(div);
+  }
+  // scroll to end
+  strip.scrollLeft = strip.scrollWidth;
+}
+
+// TABS
+function showTab(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// INIT
+loadState();
+renderCalStrip();
+renderChecklist();
+</script>
+</body>
+</html>
